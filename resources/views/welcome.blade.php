@@ -244,14 +244,10 @@
                     </div>
                     <div class="transaction-container">
                         <div class="transaction-header">
-                            <p class="txhash">TxHash</p>
-                            <p class="block">Block</p>
-                            <p class="from">From</p>
-                            <div class="arrow"></div>
-                            <p class="to">To</p>
-                            <p class="value">Value</p>
-                            <p class="fee">Fee</p>
-                            <p class="status">Status</p>
+                            <p class="txhash" style="min-width:35%;max-width:35%">From <img src="images/FlA8che.png" style="width:14px"> To</p>
+                            <p class="value" style="min-width:25%;max-width:25%">Value</p>
+                            <p class="fee" style="min-width:20%;max-width:20%">Link to transaction</p>
+                            <p class="status" style="min-width:auto;max-width:none">Status</p>
                         </div>
                         <div class="transaction-content"></div>
                     </div>

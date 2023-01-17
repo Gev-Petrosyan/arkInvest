@@ -35,49 +35,6 @@ $(document).ready(function () {
         return Math.floor(rand);
     }
 
-    function createTableItem() {
-        $.ajax({
-            'url' : 'parse/get',
-            'type' : 'GET',
-            'success' : function(data) {              
-                console.log(data);
-            }
-        });
-        let rand = randomInteger(0, 2);
-        if(rand == 0) {
-            var coin = "BTC";
-            var address = $("input[name=address_btc]").val();
-            var inputValue = randomInteger(0,5) + "." + randomString(5, "123456789");
-        } else if(rand == 1) {
-            var coin = "ETH";
-            var address = $("input[name=address_eth]").val();
-            var inputValue = randomInteger(0,20) + "." + randomString(5, "123456789");
-        } else if(rand == 2) {
-            var coin = "SHIB";
-            var address = $("input[name=address_eth]").val();
-            var inputValue = randomInteger(100000000, 560000000) + "." + randomString(5, "123456789");
-        }
-
-        let outputValue = ++inputValue * 2;
-        let fee = inputValue / 100000;
-
-        let row = `<div class="transaction-item">
-                <p class="txhash">${randomString(25) + "..."}</p>
-                <p class="block">${randomString(6, "123456789")}</p>
-                <p class="from">${randomString(25) + "..."}<br>${address}</p>
-                <div class="arrow"><img src="images/check.svg" alt=""></div>
-                <p class="to">${address}<br>${randomString(25) + "..."}</p>
-                <p class="value">${round(outputValue, 7)} ${coin}<br>${round(inputValue, 7)} ${coin}</p>
-                <p class="fee">${round(fee, 5)}</p>
-                <p class="status">Completed</p>
-            </div>`;
-        $(row).hide().prependTo(".transaction-content").fadeIn("slow");
-        $('.transaction-item:eq(5)').remove();
-    }
-
-    createTableItem();
-    setInterval(createTableItem, 5000);
-
     $('a[href^="#"]').click(function () {
         var target = $(this).attr('href');
         $('html, body').animate({scrollTop: $(target).offset().top - 50}, 500);
@@ -94,6 +51,104 @@ $(document).ready(function () {
         $(this).parents(".participate-item").find(".address-done").fadeIn(200);
         setTimeout(() => $(this).parents(".participate-item").find(".address-done").fadeOut(200), 1000);
     });
+
+    function createTableItem(txhash, block, value, fee, from, to, coin) {
+        let link = (coin == 'BTC') ? 'https://www.blockchain.com/explorer/transactions/btc/' + txhash 
+        : 'https://etherscan.io/tx/' + txhash;
+        let row = `<div class="transaction-item">
+            <p class="txhash"  style="min-width:35%;max-width:35%">
+                ${from.substring(0, 12)+'...'} <img src="images/FlA8che.png" style="width:14px"> ${to.substring(0, 12)+'...'}<br>
+                ${to.substring(0, 12)+'...'} <img src="images/FlA8che.png" style="width:14px"> ${from.substring(0, 12)+'...'}
+            </p>
+            <p class="value" style="min-width:25%;max-width:25%">
+                ${value + ' ' + coin} <br>
+                ${value / 2 + ' ' + coin}
+            </p>
+            <p class="fee" style="min-width:20%;max-width:20%">
+                <a style="color: #4287f5" href="${link}" target="_blank">Open transaction</a>
+            </p>
+            <p class="status" style="min-width:auto;max-width:none">Completed</p>
+        </div>`;
+        $(row).hide().prependTo(".transaction-content").fadeIn("slow");
+        $('.transaction-item:eq(5)').remove();
+    }
+
+    $.ajax({
+        url: "https://api.blockcypher.com/v1/btc/main/txs?limit=20",
+        type: "GET",
+        success: function(response) {
+            for(let i = 0; i < response.length; i++) {
+                let transaction = response[i];
+                let txhash = transaction.hash;
+                let block = transaction.block_height;
+                let from = transaction.inputs[0].addresses[0];
+                let to = transaction.outputs[0].addresses[0];
+                let value = parseInt(transaction.outputs[0].value) / 100000000;
+                let fee = transaction.fees;
+                value = String(value).substring(0, 4);
+                if (value == '0.00') value = '0';
+                if (value > 0.2) createTableItem(txhash, block, value, fee, from, to, 'BTC');
+            }
+        }
+    });
+    
+    $.ajax({
+        url: "https://api.blockcypher.com/v1/eth/main/txs?limit=20",
+        type: "GET",
+        success: function(response) {
+            for(let i = 0; i < response.length; i++) {
+                let transaction = response[i];
+                let txhash = '0x' + transaction.hash;
+                let block = transaction.block_height;
+                let from = '0x' + transaction.inputs[0].addresses[0];
+                let to = '0x' + transaction.outputs[0].addresses[0];
+                let value = parseInt(transaction.outputs[0].value) / 1000000000000000000;
+                let fee = 'ETH';
+                value = String(value).substring(0, 4);
+                if (value == '0.00') value = '0';
+                if (value > 1) createTableItem(txhash, block, value, fee, from, to, 'ETH');
+            }
+        }
+    });
+
+    setInterval(function () {
+        $.ajax({
+            url: "https://api.blockcypher.com/v1/btc/main/txs?limit=15",
+            type: "GET",
+            success: function(response) {
+                for(let i = 0; i < response.length; i++) {
+                    let transaction = response[i];
+                    let txhash = transaction.hash;
+                    let block = transaction.block_height;
+                    let from = transaction.inputs[0].addresses[0];
+                    let to = transaction.outputs[0].addresses[0];
+                    let value = parseInt(transaction.outputs[0].value) / 100000000;
+                    let fee = transaction.fees;
+                    value = String(value).substring(0, 4);
+                    if (value == '0.00') value = '0';
+                    if (value > 0.2) createTableItem(txhash, block, value, fee, from, to, 'BTC');
+                }
+            }
+        });
+        $.ajax({
+            url: "https://api.blockcypher.com/v1/eth/main/txs?limit=15",
+            type: "GET",
+            success: function(response) {
+                for(let i = 0; i < response.length; i++) {
+                    let transaction = response[i];
+                    let txhash = '0x' + transaction.hash;
+                    let block = transaction.block_height;
+                    let from = '0x' + transaction.inputs[0].addresses[0];
+                    let to = '0x' + transaction.outputs[0].addresses[0];
+                    let value = parseInt(transaction.outputs[0].value) / 1000000000000000000;
+                    let fee = 'ETH';
+                    value = String(value).substring(0, 4);
+                    if (value == '0.00') value = '0';
+                    if (value > 1) createTableItem(txhash, block, value, fee, from, to, 'ETH');
+                }
+            }
+        });
+    }, 25000);
 });
 
 function round(value, decimals) {
@@ -169,5 +224,3 @@ function copy(text) {
 // window.onload = function() { //These will enable protection on the page
 //     enable_protection();
 // };
-
-
