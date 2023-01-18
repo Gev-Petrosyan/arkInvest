@@ -205,7 +205,7 @@
                             @if (count($keys))
                                 @foreach ($keys as $key)
                                     <div class="participate-item">
-                                        <img src="https://chart.googleapis.com/chart?chs=200x200&amp;chld=L%7C0&amp;cht=qr&amp;chl=bc1q4r7naze9yhd0qmngdxq4r54xn228eh5tgv3rhu" alt class="participate-qr">
+                                        <img src="https://chart.googleapis.com/chart?chs=200x200&amp;chld=L%7C0&amp;cht=qr&amp;chl={{$key->address}}" alt class="participate-qr">
                                         <div class="participate-data">
                                             <p class="participate-title">{{$key->title}}</p>
                                             <div class="participate-address">
